@@ -8,8 +8,8 @@ RTClib RTC;
 
 TM1637Display display = TM1637Display(CLK, DIO);
 
-const uint8_t data[] = { 0xff, 0xff, 0xff, 0xff };
-const uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 };
+const uint8_t data[] = {0xff, 0xff, 0xff, 0xff};
+const uint8_t blank[] = {0x00, 0x00, 0x00, 0x00};
 
 int pin = 6;
 int blue = 12;
@@ -18,15 +18,18 @@ int red = 10;
 
 int prevSecond = 0;
 
-int digits [8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; 
+int digits[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-void setCounter(int n) {
- for (int i=0; i <= 7; i++) {
-  digits[i] = bitRead(n, i);
- }
+void setCounter(int n)
+{
+  for (int i = 0; i <= 7; i++)
+  {
+    digits[i] = bitRead(n, i);
+  }
 }
 
-void fireTick (int pin, int color, int delayMs) {
+void fireTick(int pin, int color, int delayMs)
+{
   printTimestamp();
   digitalWrite(pin, HIGH);
   digitalWrite(color, HIGH);
@@ -37,7 +40,8 @@ void fireTick (int pin, int color, int delayMs) {
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void fireMarker (int pin, int primaryColor, int secondaryColor, int delayMs) {
+void fireMarker(int pin, int primaryColor, int secondaryColor, int delayMs)
+{
   digitalWrite(pin, HIGH);
   digitalWrite(primaryColor, HIGH);
   digitalWrite(secondaryColor, HIGH);
@@ -48,8 +52,10 @@ void fireMarker (int pin, int primaryColor, int secondaryColor, int delayMs) {
   delay(delayMs * 2);
 }
 
-void reactToDigit (bool value, int pin, int color, int delayMs) {
-  if (value) {
+void reactToDigit(bool value, int pin, int color, int delayMs)
+{
+  if (value)
+  {
     Serial.print("1");
     digitalWrite(pin, HIGH);
     digitalWrite(color, HIGH);
@@ -59,13 +65,16 @@ void reactToDigit (bool value, int pin, int color, int delayMs) {
     digitalWrite(color, LOW);
     digitalWrite(LED_BUILTIN, HIGH);
     delay(delayMs);
-  } else {
+  }
+  else
+  {
     Serial.print("0");
     delay(delayMs * 2);
   }
 }
 
-void printTimestamp() {
+void printTimestamp()
+{
   DateTime now = RTC.now();
   Serial.print(now.day(), DEC);
   Serial.print('.');
@@ -81,7 +90,8 @@ void printTimestamp() {
   Serial.println();
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(57600);
   display.clear();
   pinMode(pin, OUTPUT);
@@ -91,7 +101,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
-void loop() {
+void loop()
+{
   DateTime now = RTC.now();
   int currHour = now.hour();
   int currMinute = now.minute();
@@ -99,46 +110,50 @@ void loop() {
 
   display.setBrightness(2);
 
-  
-  
-  if(currSecond != prevSecond) {
+  if (currSecond != prevSecond)
+  {
     now = RTC.now();
     prevSecond = now.second();
 
     int currHourMin = (currHour * 100) + (currMinute % 100);
     display.showNumberDecEx(currHourMin, 0b01000000, false, 4, 0);
 
-    if (currSecond % 10 != 0 && currSecond % 60 != 0) {  
-     fireTick(pin, blue, 30);
+    if (currSecond % 10 != 0 && currSecond % 60 != 0)
+    {
+      fireTick(pin, blue, 30);
 
-     // int currMinSec = (currMinute * 100) + (currSecond % 100);
-     // display.showNumberDecEx(currMinSec, 0b01000000, false, 4, 0);
+      // int currMinSec = (currMinute * 100) + (currSecond % 100);
+      // display.showNumberDecEx(currMinSec, 0b01000000, false, 4, 0);
 
-     display.showNumberDec(currSecond);
+      display.showNumberDec(currSecond);
 
-     delay(500);
+      delay(500);
 
-     int currHourMin = (currHour * 100) + (currMinute % 100);
+      int currHourMin = (currHour * 100) + (currMinute % 100);
       display.showNumberDecEx(currHourMin, 0b01000000, false, 4, 0);
-     
-    } else if (currSecond % 60 != 0) {
+    }
+    else if (currSecond % 60 != 0)
+    {
       printTimestamp();
-      
-      setCounter(currMinute);  
-       
+
+      setCounter(currMinute);
+
       Serial.print("Minute: ");
       Serial.print(currMinute);
       Serial.print(" in binary: ");
-      
+
       fireMarker(pin, blue, green, 75);
-      for (int i=0; i<=7; i++) {
+      for (int i = 0; i <= 7; i++)
+      {
         reactToDigit(digits[i], pin, green, 50);
       }
-      
+
       Serial.println();
-    } else {
+    }
+    else
+    {
       printTimestamp();
-      
+
       setCounter(currHour);
 
       int currHourMin = (currHour * 100) + (currMinute % 100);
@@ -150,10 +165,11 @@ void loop() {
 
       fireMarker(pin, blue, red, 75);
 
-      for (int i=0; i<=7; i++) {
+      for (int i = 0; i <= 7; i++)
+      {
         reactToDigit(digits[i], pin, red, 50);
       }
-      
+
       Serial.println();
     }
   }
